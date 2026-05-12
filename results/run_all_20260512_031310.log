@@ -1,0 +1,67 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+device=cuda dtype=torch.float16
+
+loading gpt2...
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  88%|████████▊ | 130/148 [00:00<00:00, 1240.97it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 864.56it/s] 
+[transformers] The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (1515 > 1024). Running this sequence through the model will result in indexing errors
+
+=== E1 — correctness vs DynamicCache (B=1, greedy) ===
+  [PASS] 'The capital of France is'
+  [PASS] 'Once upon a time'
+  [PASS] 'Roses are red,'
+  [PASS] 'The quick brown fox jumps over the'
+  4/4 match  blocks_remaining=0
+
+=== E3 — prefix sharing (N=8 parallel of one 256-tok prompt) ===
+  indep   pre=1536  post=1632
+  shared  pre=192  post=288
+  prefill ratio: 8.00x  (theoretical max = N = 8)
+  total ratio:   5.67x
+
+=== E5 — continuous (v2) vs uniform (v1) ===
+  workload N=16, source=no_robots, prompt_lens p50/p95/max=27/173/206, output_lens p50/p95/max=185/256/256
+  v1 wall 13.81s  (175.3 tok/s)
+  v2 wall 10.40s  (232.7 tok/s)
+  speedup 1.33x   greedy match 16/16 (threshold 12)
+
+=== E6 — kernel parity (paged decode kernel vs DynamicCache) ===
+  backend=triton  prefix_required=3
+  [PASS] lcp=16/16  'The capital of France is'
+  [PASS] lcp=16/16  'Once upon a time'
+  [PASS] lcp=16/16  'Roses are red,'
+  [PASS] lcp=3/16  'The quick brown fox jumps over the'
+  4/4 match  blocks_remaining=0
+
+=== plots — regenerating report figures ===
+  -> e2_memory_timeseries ...
+saved plots/e2_memory_timeseries.png  (paged peak 1100, naive peak 4992, ratio 4.54x)
+  -> e2_memory_real_lengths ...
+loading tokenizer + streaming no_robots...
+loaded 1500 requests in 2.7s
+  prompt_len   median=34  p95=358  max=1515
+  output_len   median=138  p95=496  max=1628
+
+saved plots/e2_memory_real_lengths.png  (paged peak 1204, naive peak 6784, ratio 5.63x)
+  -> e3_savings_vs_n ...
+  N=  2: prefill 2.00x, after 4 decode 1.89x
+  N=  4: prefill 4.00x, after 4 decode 3.40x
+  N=  8: prefill 8.00x, after 4 decode 5.67x
+  N= 16: prefill 16.00x, after 4 decode 8.50x
+
+saved plots/e3_savings_vs_n.png
+  -> e5_speedup_sweep ...
+
+N sweep (sigma=0.6):
+  N= 4: v1=0.71s v2=0.61s speedup=1.16x
+  N= 8: v1=0.89s v2=0.79s speedup=1.12x
+  N=12: v1=1.43s v2=1.28s speedup=1.12x
+
+sigma sweep (N=8):
+  sigma=0.3: prompt_lens=[38, 44, 31, 54, 29, 30, 18, 25] (max=54) v1=0.83s v2=0.85s speedup=0.97x
+  sigma=0.6: prompt_lens=[39, 53, 26, 80, 23, 25, 9, 17] (max=80) v1=0.91s v2=0.79s speedup=1.15x
+  sigma=0.9: prompt_lens=[40, 65, 22, 118, 19, 20, 4, 11] (max=118) v1=1.64s v2=1.16s speedup=1.41x
+
+saved plots/e5_speedup_sweep.png
+
+=== summary ===  E1 OK  E5 OK  E6 OK
