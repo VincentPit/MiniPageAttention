@@ -1,3 +1,32 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
 .DS_Store
+
+# LaTeX build artifacts (report.tex is the source of truth)
+doc/*.aux
+doc/*.out
+doc/*.toc
+doc/*.fls
+doc/*.fdb_latexmk
+doc/*.synctex.gz
+doc/*.bbl
+doc/*.blg
+doc/*.pdf
+
+# Local model / HF caches
+.cache/
+*.bin
+*.safetensors
