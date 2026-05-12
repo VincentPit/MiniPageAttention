@@ -17,6 +17,7 @@ env/
 
 # LaTeX build artifacts (report.tex is the source of truth)
 doc/*.aux
+doc/*.log
 doc/*.out
 doc/*.toc
 doc/*.fls
